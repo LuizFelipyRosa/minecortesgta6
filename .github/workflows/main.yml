@@ -1,1 +1,37 @@
 
+name: Build PC
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Instalar programas
+        run: pip install -r requirements.txt pyinstaller
+
+      - name: Montar o app
+        run: pyinstaller --onefile --windowed --name MineCortes --collect-all faster_whisper --collect-all ctranslate2 --collect-all onnxruntime minecortes_gui.py
+
+      - name: Guardar o app em Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: MineCortes-Windows
+          path: dist/MineCortes.exe
+
+      - name: Criar botão de download em Releases
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v1.${{ github.run_number }}
+          name: MineCortes v1.${{ github.run_number }}
+          files: dist/MineCortes.exe
